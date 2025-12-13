@@ -22,11 +22,6 @@ func (c *Cell) String() string {
 	return fmt.Sprintf("Cell{X=%d, Y=%d}", c.X, c.Y)
 }
 
-type Figure interface {
-	Threatens(cell Cell) bool
-	useCell(cell *Cell)
-}
-
 func NewDesk(x int, y int) Desk {
 	result := Desk{X: x, Y: y}
 	result.cells = make([]Cell, x*y)
@@ -70,15 +65,19 @@ func (d *Desk) cellAt(x int, y int) (*Cell, error) {
 
 func (d *Desk) PlaceFigure(f Figure) (*Figure, bool) {
 	safeCells := d.safeCells()
+	log.Printf("Safe cells len is %d\n", len(safeCells))
 	if len(safeCells) == 0 {
 		log.Println("No safe cells to place figure")
 		return nil, false
 	}
 
-	//TODO: select with max possible cells left
-	safeCell := safeCells[0]
-	f.useCell(safeCell)
-	safeCell.Use()
+	bestCell := d.findBestCell(f, safeCells)
+
+	// Now, perform the actual placement on the bestCell
+	f.useCell(bestCell) // Set the figure's final position
+	bestCell.Use()      // Mark the cell as occupied
+
+	// Update all cells on the actual board for threats from the newly placed figure
 	for i := range d.cells {
 		cell := &d.cells[i]
 		if f.Threatens(*cell) {
@@ -87,6 +86,39 @@ func (d *Desk) PlaceFigure(f Figure) (*Figure, bool) {
 	}
 
 	return &f, true
+}
+
+func (d *Desk) findBestCell(f Figure, safeCells []*Cell) *Cell {
+	var bestCell *Cell
+	minThreatenCells := 128
+
+	for _, candidateCell := range safeCells {
+		f.useCell(candidateCell)
+
+		simulatedSafeCellsCount := 0
+
+		for _, cell := range safeCells {
+			if f.Threatens(*cell) || cell.occupied || cell.underThreat {
+				simulatedSafeCellsCount++
+			}
+		}
+
+		if simulatedSafeCellsCount < minThreatenCells {
+			minThreatenCells = simulatedSafeCellsCount
+			bestCell = candidateCell
+			log.Printf("Current best cell is %s with result %d", candidateCell, minThreatenCells)
+		}
+
+		f.clearCell()
+	}
+
+	if bestCell == nil && len(safeCells) > 0 {
+		// This case should ideally not happen if safeCells was not empty,
+		// but as a fallback, pick the first safe cell.
+		return safeCells[0]
+	}
+
+	return bestCell
 }
 
 func (c *Cell) Use() {

@@ -1,23 +1,15 @@
 package figures
 
-import (
-	"fmt"
-)
-
 type Pawn struct {
-	x int
-	y int
+	FigureBase
 }
 
 func (p *Pawn) Threatens(cell Cell) bool {
-	return AbsInt(cell.X-p.x) == 1 && cell.Y-p.y == 1
+	// this is wrong, but let's assume that pawn can beat in every direction like a King.
+	// We don't have white and black here.
+	return AbsInt(cell.X-p.x) == 1 && AbsInt(cell.Y-p.y) == 1
 }
 
-func (p *Pawn) useCell(cell *Cell) {
-	p.x = cell.X
-	p.y = cell.Y
-}
-
-func (p Pawn) String() string {
-	return fmt.Sprintf("Pawn{X=%d, Y=%d}", p.x, p.y)
+func (p *Pawn) String() string {
+	return p.FigureBase.String("Pawn")
 }

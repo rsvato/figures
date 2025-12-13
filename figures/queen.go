@@ -1,10 +1,8 @@
 package figures
 
-import "fmt"
 
 type Queen struct {
-	x int
-	y int
+	FigureBase
 }
 
 func (q *Queen) Threatens(cell Cell) bool {
@@ -12,11 +10,6 @@ func (q *Queen) Threatens(cell Cell) bool {
 		cell.X == q.x || cell.Y == q.y
 }
 
-func (q *Queen) useCell(cell *Cell) {
-	q.x = cell.X
-	q.y = cell.Y
-}
-
 func (q *Queen) String() string {
-	return fmt.Sprintf("Queen{X: %d, Y: %d}", q.x, q.y)
+	return q.FigureBase.String("Queen")
 }

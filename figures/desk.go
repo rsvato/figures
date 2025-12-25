@@ -51,12 +51,10 @@ func (d *Desk) Print() {
 }
 
 func (d *Desk) cellAt(x int, y int) (*Cell, error) {
-	// Предполагаем, что Desk.X - это ширина
 	if x >= d.X || y >= d.Y || x < 0 || y < 0 {
 		return nil, fmt.Errorf("coordinates %d:%d out of bounds %d:%d", x, y, d.X, d.Y)
 	}
 
-	// Вычисляем индекс, как в NewDesk
 	index := y*d.X + x
 
 	// Возвращаем указатель на элемент в исходном массиве
@@ -73,11 +71,9 @@ func (d *Desk) PlaceFigure(f Figure) (*Figure, bool) {
 
 	bestCell := d.findBestCell(f, safeCells)
 
-	// Now, perform the actual placement on the bestCell
-	f.useCell(bestCell) // Set the figure's final position
-	bestCell.Use()      // Mark the cell as occupied
+	f.useCell(bestCell)
+	bestCell.Use()
 
-	// Update all cells on the actual board for threats from the newly placed figure
 	for i := range d.cells {
 		cell := &d.cells[i]
 		if f.Threatens(*cell) {

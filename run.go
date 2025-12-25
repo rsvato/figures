@@ -7,9 +7,9 @@ import (
 )
 
 func main() {
-	desk := figures.NewDesk(5, 5)
+	desk := figures.NewDesk(8, 8)
 	desk.Print()
-	for t := range 64 {
+	for t := range desk.X * desk.Y {
 		p, ok := desk.PlaceFigure(&figures.Queen{})
 		if !ok {
 			fmt.Printf("Total of %d figures placed\n", t)
